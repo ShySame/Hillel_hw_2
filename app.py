@@ -1,6 +1,6 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request,url_for
 from faker import Faker
-
+import csv, requests
 
 app = Flask(__name__)
 
@@ -8,27 +8,18 @@ app = Flask(__name__)
 @app.route('/')
 def hello_world():
     return 'Hello Web!'
-
-
 # -------------------------------------------------------------------------------------
-f = open('requirements.txt', 'r')
-g = f.read()
-
-
 @app.route('/requirements/')
 def requir():
+    f = open('requirements.txt', 'r')
+    g = f.read()
+    f.close()
     return render_template('requir.html', text=g)
-
-
-f.close()
 # -------------------------------------------------------------------------------------
-
-
 # -------------------------------------------------------------------------------------
 @app.route('/generate-users/')
 def users():
     kol=int(request.args.get("numbers"))
-    print(kol)
     fake = Faker()
     user = []
     for i in range(kol):
@@ -36,9 +27,25 @@ def users():
         email = "".join(name.split()) + "@mail.com"
         user_ = name + " : " + email.lower()
         user.append(user_)
-    print(user)
-
     return render_template("user_gen.html", us=user, kol=kol)
+# -------------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------------
+@app.route('/mean/')
+def heiwei():
+    with open("hw.csv", newline='') as csvfile:
+        reader_object = csv.DictReader(csvfile, delimiter=",")
+        height, weight=0,0
+        for row in reader_object:
+            height+=float(row['Height(Inches)'])
+            weight += float(row['Weight(Pounds)'])
+        kol=int(row['Index'])
+    return render_template('average.html', avg_hei=height/kol, avg_wei=weight/kol)
+# -------------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------------
+@app.route('/space/')
+def space():
+    r = requests.get('http://api.open-notify.org/astros.json')
+    return render_template('space.html', kol=r.json()['number'])
 # -------------------------------------------------------------------------------------
 
 
